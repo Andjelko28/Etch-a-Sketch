@@ -1,0 +1,33 @@
+:root {
+    --gridColumn: 1;
+    --gridRows: 1;
+}
+
+
+.canvas-wrapper {
+    display: grid;
+    width: 500px;
+    height: 500px;
+    margin: auto;
+    border: 2px solid black;
+    grid-template-columns: repeat(var(--gridColumn), 1fr);
+    grid-template-rows: repeat(var(--gridRows), 1fr);
+}
+
+.grid-items {
+    user-select: none;
+    border: 1px solid black;
+}
+
+.colors-wrapper {
+    display: flex;
+    justify-content: center;
+    margin: 30px;
+}
+
+.settings-wrapper {
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    margin: 30px;
+}
