@@ -1,14 +1,6 @@
 const DEFAULT_SIZE = 16;
 const DEFAULT_COLOR = 'black';
 
-// Declaring default parameters
-
-let currentSize = DEFAULT_SIZE;
-let currentColor = DEFAULT_COLOR;
-let isDrawing = false;
-let currentMode = 'black';
-
-
 // Creating DOM 
 
 const grid = document.querySelector('.canvas-wrapper');
@@ -19,133 +11,123 @@ const rainbow = document.querySelector('.rainbow');
 const eraser = document.querySelector('.eraser');
 const clearBtn = document.querySelector('.clear-btn');
 
-// Set modes for grid
-
-function setBlackMode() {
-    currentMode = 'black';
-}
-
-function setEraseMode() {
-    currentMode = 'erase';
-}
-
-function setRainbowMode() {
-    currentMode = 'rainbow';
-}
-
-function getRandomColor() {
-    return Math.floor(Math.random() * 256);
-}
 
 
-// Settign function to set color or eraser
+function etchCreator() {
+    let currentSize = DEFAULT_SIZE;
+    let currentColor = DEFAULT_COLOR;
+    let isDrawing = false;
 
-function applyColorOrErase(event) {
-    if (currentMode === 'black') {
-        event.target.style.backgroundColor = currentColor;
-    } else if (currentMode === 'erase') {
-        event.target.style.backgroundColor = 'white';
-    } else if (currentMode === 'rainbow') {
-        const randomR = getRandomColor();
-        const randomG = getRandomColor();
-        const randomB = getRandomColor();
-        event.target.style.backgroundColor = `rgb(${randomR},${randomB},${randomG})`;
+
+    const setCurrentColor = (newColor) => currentColor = newColor;
+
+    function setRandomColor() {
+        return Math.floor(Math.random() * 256);
     }
-}
 
-// Function to set modes for grid  cells
-function setModes(mode) {
-    if (mode === 'erase') {
-        setEraseMode();
-    } else if (mode === 'black') {
-        setBlackMode();
-    } else if (mode === 'rainbow') {
-        setRainbowMode()
+    function setCurrentSize(newSize) {
+        currentSize = newSize;
     }
-    colorGrid();
+
+    const getCurrentColor = () => currentColor;
+
+    const getCurrentSize = () => currentSize;
+
+    function getRandomColor(e) {
+        return  `rgb(${setRandomColor()}, ${setRandomColor()}, ${setRandomColor()})`;
+    }
+
+
+    return { setCurrentColor, getCurrentColor, setCurrentSize, getRandomColor, getCurrentSize, setRandomColor, isDrawing }
 }
 
-// Function that will color grid
-function colorGrid() {
-    grid.addEventListener('mouseover', (e) => {
-        isDrawing = true;
-        applyColorOrErase(e);
-    })
-    grid.addEventListener('mouseover', (e) => {
-        if (isDrawing) {
-            applyColorOrErase(e);
+
+function gridCreator() {
+
+    function displayNewSize(element, value) {
+        element.innerHTML = `${value} x ${value}`;
+    }
+
+    function createGrid(gridArg, colRow) {
+        gridArg.style.setProperty('--gridColumn', colRow);
+        gridArg.style.setProperty('--gridRows', colRow);
+
+        for (let i = 0; i < colRow * colRow; i++) {
+            const cell = document.createElement('div');
+            grid.appendChild(cell).className = 'grid-items';
         }
-    });
-    grid.addEventListener('mouseup', (e) => {
-        isDrawing = false;
-    });
-
-    document.addEventListener('mouseup', (e) => {
-        isDrawing = false;
-    });
-
-    sizeSlider.addEventListener('mouseover', () => {
-        isDrawing = false;
-    })
-
-
-}
-
-// Creating grid
-
-function setCurrentSize(newSize) {
-    currentSize = newSize;
-}
-
-
-function displayNewSize(value) {
-    sizeValue.innerHTML = `${value} x ${value}`;
-}
-
-function createGrid() {
-    grid.style.setProperty('--gridColumn', currentSize);
-    grid.style.setProperty('--gridRows', currentSize);
-
-    for (let i = 0; i < currentSize * currentSize; i++) {
-        const cell = document.createElement('div');
-        grid.appendChild(cell).className = 'grid-items';
+        etch.getCurrentColor();
     }
-    setModes('black');
+
+    function clearGrid(gridParam) {
+        gridParam.innerHTML = ' ';
+    }
+
+    function reloadGrid(gridParam) {
+        clearGrid(gridParam);
+        createGrid(gridParam);
+    }
+
+
+    return { displayNewSize, createGrid, reloadGrid, clearGrid }
 }
 
-function clearGrid() {
+
+function colGrid() {
+
+    function colorGrid(gridArg) {
+        gridArg.addEventListener('mouseover', (e) => {
+            etch.isDrawing = true;
+            e.target.style.backgroundColor = etch.getCurrentColor();
+        });
+        grid.addEventListener('mouseover', (e) => {
+            if (etch.isDrawing) {
+                e.target.style.backgroundColor = etch.getCurrentColor();
+            }
+        });
+        gridArg.addEventListener('mouseup', (e) => {
+            etch.isDrawing = true;
+        });
+
+        document.addEventListener('mouseup', (e) => {
+            etch.isDrawing = true;
+        });
+
+        sizeSlider.addEventListener('mouseover', () => {
+            etch.isDrawing = true;
+        })
+
+    }
+    return { colorGrid }
+}
+
+const etchGrid = gridCreator();
+const etch = etchCreator();
+const colorGridEl = colGrid();
+etchGrid.createGrid(grid, etch.getCurrentSize());
+
+sizeSlider.addEventListener('change', (e) => {
+    etch.setCurrentSize(e.target.value);
     grid.innerHTML = '';
-}
-
-function reloadGrid() {
-    clearGrid();
-    createGrid(currentSize);
-}
-
-function updateGrdiSize(value) {
-    setCurrentSize(value);
-    displayNewSize(value);
-    reloadGrid();
-}
-
-sizeSlider.addEventListener('mousemove', (e) => {
-    updateGrdiSize(e.target.value);
-});
-
-sizeSlider.addEventListener('change', (e) => updateGrdiSize(e.target.value));
-createGrid(currentSize);
-
-// Event listeners
-clearBtn.addEventListener('click', reloadGrid);
-
-black.addEventListener("click", () => {
-    setModes('black');
+    etchGrid.createGrid(grid, etch.getCurrentSize());
+    etchGrid.displayNewSize(sizeValue, etch.getCurrentSize());
 })
 
-rainbow.addEventListener('click', () => {
-    setModes('rainbow');
+clearBtn.addEventListener('click', () => { etchGrid.reloadGrid(grid) });
+
+black.addEventListener('click', () => {
+    etch.setCurrentColor('black');
+    colorGridEl.colorGrid(grid);
 })
 
 eraser.addEventListener('click', () => {
-    setModes('erase')
+    etch.setCurrentColor('white');
+    colorGridEl.colorGrid(grid);
 })
+
+rainbow.addEventListener('click', () => {
+    etch.setCurrentColor(etch.getRandomColor());
+    colorGridEl.colorGrid(grid);
+})
+
+
