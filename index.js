@@ -23,6 +23,7 @@ function etchCreator() {
 
     function setRandomColor() {
         return Math.floor(Math.random() * 256);
+        //252, 186, 3
     }
 
     function setCurrentSize(newSize) {
@@ -33,8 +34,10 @@ function etchCreator() {
 
     const getCurrentSize = () => currentSize;
 
-    function getRandomColor(e) {
-        return  `rgb(${setRandomColor()}, ${setRandomColor()}, ${setRandomColor()})`;
+    function getRandomColor() {
+        const randomColor = `rgb(${setRandomColor()}, ${setRandomColor()}, ${setRandomColor()})`;
+        console.log(randomColor);
+        return randomColor;
     }
 
 
@@ -60,7 +63,7 @@ function gridCreator() {
     }
 
     function clearGrid(gridParam) {
-        gridParam.innerHTML = ' ';
+        gridParam.innerHTML = '';
     }
 
     function reloadGrid(gridParam) {
@@ -72,6 +75,7 @@ function gridCreator() {
     return { displayNewSize, createGrid, reloadGrid, clearGrid }
 }
 
+let timer;
 
 function colGrid() {
 
@@ -80,6 +84,7 @@ function colGrid() {
             etch.isDrawing = true;
             e.target.style.backgroundColor = etch.getCurrentColor();
         });
+
         grid.addEventListener('mouseover', (e) => {
             if (etch.isDrawing) {
                 e.target.style.backgroundColor = etch.getCurrentColor();
@@ -113,21 +118,26 @@ sizeSlider.addEventListener('change', (e) => {
     etchGrid.displayNewSize(sizeValue, etch.getCurrentSize());
 })
 
-clearBtn.addEventListener('click', () => { etchGrid.reloadGrid(grid) });
+clearBtn.addEventListener('click', () => { etchGrid.clearGrid(grid), etchGrid.createGrid(grid, etch.getCurrentSize()),clearInterval(timer),etch.setCurrentColor('white'); });
 
 black.addEventListener('click', () => {
+    clearInterval(timer);
     etch.setCurrentColor('black');
     colorGridEl.colorGrid(grid);
 })
 
 eraser.addEventListener('click', () => {
+    clearInterval(timer);
     etch.setCurrentColor('white');
     colorGridEl.colorGrid(grid);
 })
 
 rainbow.addEventListener('click', () => {
-    etch.setCurrentColor(etch.getRandomColor());
-    colorGridEl.colorGrid(grid);
+    timer = setInterval(() => {
+        etch.setCurrentColor(etch.getRandomColor());
+        colorGridEl.colorGrid(grid);
+    }, 100)
+
 })
 
 
